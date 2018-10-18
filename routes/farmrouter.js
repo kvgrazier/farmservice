@@ -71,12 +71,21 @@ router.get('/accountlist/', function(req, res) {
 
 /* AccountPersonList */
 router.get('/accountpersonlist/', function(req, res) {
-  res.json(["Allen", "Mark", "Mike"]);
+  res.json(  
+  [{value: 'Allen', viewValue: 'Allen'},
+  {value: 'Mark', viewValue: 'Mark'},
+  {value: 'Mike', viewValue: 'Mike'}]
+  ); 
+ // ["Allen", "Mark", "Mike"]
 });
 
 /* AccountTypeList */
 router.get('/accounttypelist/', function(req, res) {
-  res.json(["Expenses", "Revenue"]);
+  res.json(
+    [{value: 'Expenses', viewValue: 'Expenses'},
+    {value: 'Revenue', viewValue: 'Revenue'}]
+//    ["Expenses", "Revenue"]
+    );
 });
 
 /* GET ALL TransactionS */
