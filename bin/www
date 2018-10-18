@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+require('dotenv').config();
 /**
  * Module dependencies.
  */
@@ -11,7 +11,7 @@ var http = require('http');
 /**
  * Get port from environment and store in Express.
  */
-
+console.log('Enviroment port ' + process.env.PORT);
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
@@ -20,7 +20,8 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+//debug('Listening on ' + server.port);
+// console.log(server.PORT);
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -87,4 +88,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  console.log('Listening on ' + bind);
 }
