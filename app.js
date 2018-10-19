@@ -7,19 +7,20 @@ var cors = require('cors')
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/FarmDB', { useNewUrlParser: true })
-  .then(() =>  console.log('Mongoose connection successful'))
+  .then(() =>  console.log('Mongoose FarmDB connection successful'))
   .catch((err) => console.error(err));
 
 var apiRouter = require('./routes/farmrouter');
 var app = express();
-app.use(cors());
+const port = 8080;
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/api', apiRouter);
 
-// catch 404 and forward to error handler
+/* // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
@@ -33,6 +34,6 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.send(err.status);
-});
-
-module.exports = app;
+}); */
+app.listen(port, () => console.log(`Farmservice listening on port ${port}!`));
+//module.exports = app;
