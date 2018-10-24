@@ -37,7 +37,23 @@ router.get('/pl/:person/:fromdate/:todate', function(req, res) {
 });
 
 /* Transactions with Accounts */
-router.get('/ta/:person/:fromdate/:todate', function(req, res) {
+router.get('/ta/', function(req, res) {
+  var fromDate = new Date(req.query.fromdate);
+  var toDate = new Date(req.query.todate);
+  Ta.aggregate([
+    {$match: { 
+      Person: req.query.person
+       ,TransactionDate: {$gte: fromDate.toISOString()}
+       ,TransactionDate: {$lte: toDate.toISOString()}
+    }}
+  ,{$sort: { TransactionID: 1 }}
+]).exec(function(err, results){
+  res.json(results);
+ })
+});
+
+/* Transactions with Accounts */
+/* router.get('/ta/:person/:fromdate/:todate', function(req, res) {
   var fromDate = new Date(req.params.fromdate);
   var toDate = new Date(req.params.todate);
   Ta.aggregate([
@@ -50,7 +66,7 @@ router.get('/ta/:person/:fromdate/:todate', function(req, res) {
 ]).exec(function(err, results){
   res.json(results);
  })
-});
+}); */
 
 /* Account List */
 router.get('/accountlist/', function(req, res) {
