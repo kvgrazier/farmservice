@@ -43,8 +43,8 @@ router.get('/ta/', function(req, res) {
   Ta.aggregate([
     {$match: { 
       Person: req.query.person
-       ,TransactionDate: {$gte: fromDate.toISOString()}
-       ,TransactionDate: {$lte: toDate.toISOString()}
+       ,TransactionDate: {$gte: fromDate}
+       ,TransactionDate: {$lte: toDate}
     }}
   ,{$sort: { TransactionID: 1 }}
 ]).exec(function(err, results){
