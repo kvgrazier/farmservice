@@ -76,8 +76,8 @@ router.get('/accountlist/', function(req, res) {
       }},
     {$project: {
         _id: 0,
-        AccountNumber: "$AccountNumber",
-        AccountName: "$AccountName"
+        AccountNumber: "$AccountNumber"
+        ,AccountDescription: { $concat: [ {$substr:["$AccountNumber", 0, -1 ]}, " - ", "$AccountName" ] }
     }},
   {$sort: { AccountNumber: 1 }}
  ]).exec(function(err, results){
