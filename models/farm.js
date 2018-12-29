@@ -52,4 +52,17 @@ function combine(callback) {
       });//end function
      });//end function
 }
-module.exports = { combine, accountsums,  accountsubtypesums, accounttypesums}
+
+function GetTransactionID(callback) {
+  MongoClient.connect(url, {native_parser:true}, function(err, client) {
+    assert.equal(null, err);
+   const db = client.db('FarmDB');
+   db.collection('transactions').find().sort({"TransactionID" : -1}).limit(1).toArray(function(err, results){
+ //   console.log("TransactionID: " + results[0].TransactionID);
+      callback(results[0].TransactionID+1);
+     })//end collection
+ client.close();
+  });//end mongoclient
+}
+
+module.exports = { combine, accountsums,  accountsubtypesums, accounttypesums, GetTransactionID}

@@ -9,10 +9,8 @@ let farm = require('../models/farm.js');
 /* test */
 router.get('/test/', function(req, res) {
   console.log("1: Router " + Date.now());
-
   let Sums = farm.combine(function(docs) {
      res.json(docs); });//end function
-
 });// end router
 
 /* Profit And Loss */
@@ -51,22 +49,6 @@ router.get('/ta/', function(req, res) {
   res.json(results);
  })
 });
-
-/* Transactions with Accounts */
-/* router.get('/ta/:person/:fromdate/:todate', function(req, res) {
-  var fromDate = new Date(req.params.fromdate);
-  var toDate = new Date(req.params.todate);
-  Ta.aggregate([
-    {$match: { 
-      Person: req.params.person
-       ,TransactionDate: {$gte: fromDate.toISOString()}
-       ,TransactionDate: {$lte: toDate.toISOString()}
-    }}
-  ,{$sort: { TransactionID: 1 }}
-]).exec(function(err, results){
-  res.json(results);
- })
-}); */
 
 /* Account List */
 router.get('/accountlist/', function(req, res) {
@@ -123,10 +105,15 @@ router.get('/transaction/:id', function(req, res, next) {
 
 /* SAVE Transaction */
 router.post('/transaction/', function(req, res, next) {
-  Transaction.create(req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
+  let maxTID = farm.GetTransactionID(function(max) {
+   // console.log('Req before is: ' + req.body.TransactionID);
+    req.body.TransactionID = max; 
+   // console.log('Req after is: ' + req.body.TransactionID);
+    Transaction.create(req.body, function (err, post) {
+      if (err) return next(err);
+      res.json(post);
+    });
+  });//end function
 });
 
 /* UPDATE Transaction */
