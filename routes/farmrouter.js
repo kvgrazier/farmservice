@@ -6,33 +6,13 @@ var Account = require('../models/Account.js');
 var Ta = require('../models/Ta.js');
 let farm = require('../models/farm.js');
 
-/* test */
-router.get('/test/', function(req, res) {
-  console.log("1: Router " + Date.now());
-  let Sums = farm.combine(function(docs) {
-     res.json(docs); });//end function
-});// end router
-
 /* Profit And Loss */
 router.get('/pl/:person/:fromdate/:todate', function(req, res) {
   var fromDate = new Date(req.params.fromdate);
   var toDate = new Date(req.params.todate);
-  Ta.aggregate([
-  {$match: { 
-    Person: req.params.person
-     ,TransactionDate: {$gte: fromDate.toISOString()}
-     ,TransactionDate: {$lte: toDate.toISOString()}
-  }}
-  ,{$group:
-      {
-        _id: { AccountType: "$AccountType", AccountSubType: "$AccountSubType", SortOrder: "$SortOrder"
-        , AccountNumber: "$AccountNumber", AccountName: "$AccountName", Person: "$Person" },
-        Amount: { $sum: "$AccountAmount" }
-      }}
-]).exec(function(err, results){
-  res.json(results);
- })
-});
+  let Sums = farm.combine(req.params.person,fromDate,toDate,function(docs) {
+    res.json(docs); });//end function
+});// end router
 
 /* Transactions with Accounts */
 router.get('/ta/', function(req, res) {

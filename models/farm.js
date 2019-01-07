@@ -1,51 +1,77 @@
-//'use strict';
+var express = require('express');
+var mongoose = require('mongoose');
+var Ta = require('../models/Ta.js');
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const url = 'mongodb://localhost:27017/';
 
-function accounttypesums(client, callback) {
-  client.connect(url, { useNewUrlParser: true },function(err, client) {
-    assert.equal(null, err);
-    console.log("AccountTypeSums " + Date.now());
-    const db = client.db('FarmDB');
-    db.collection('accounttypesums').find({}).toArray(function(err, docs) {
-      assert.equal(err, null);
-      callback(docs);
-    });//end collection
- client.close();
-  });//end mongoclient
+function accounttypesums(person,fromDate,toDate,callback) {
+    var fromDate = new Date(fromDate.toISOString());
+    var toDate = new Date(toDate.toISOString());
+          Ta.aggregate([
+            {$match: { 
+              Person: person
+               ,TransactionDate: {$gte: fromDate}
+               ,TransactionDate: {$lte: toDate}
+            }}
+            ,{$group:
+              {
+                _id: { AccountType: "$AccountType", AccountSubType: "Total", SortOrder: ""
+                , AccountNumber: "", AccountName: "",Person: "$Person" },
+                Amount: { $sum: "$AccountAmount" }
+            }}
+          ])//end Aggregate
+          .exec(function(err, results){
+            callback(results);
+           })
+  }//end function
+
+function accountsubtypesums(person,fromDate,toDate,callback) {
+    var fromDate = new Date(fromDate.toISOString());
+    var toDate = new Date(toDate.toISOString());
+          Ta.aggregate([
+            {$match: { 
+              Person: person
+               ,TransactionDate: {$gte: fromDate}
+               ,TransactionDate: {$lte: toDate}
+            }}
+            ,{$group:
+              {
+                _id: { AccountType: "$AccountType", AccountSubType: "$AccountSubType", SortOrder: "$SortOrder"
+                , AccountNumber: "Total", AccountName: "",Person: "$Person" },
+                Amount: { $sum: "$AccountAmount" }
+            }}
+          ])//end Aggregate
+          .exec(function(err, results){
+            callback(results);
+           })
+  }//end function
+
+function accountsums(person,fromDate,toDate,callback) {
+  var fromDate = new Date(fromDate.toISOString());
+  var toDate = new Date(toDate.toISOString());
+        Ta.aggregate([
+          {$match: { 
+            Person: person
+             ,TransactionDate: {$gte: fromDate}
+             ,TransactionDate: {$lte: toDate}
+          }}
+          ,{$group:
+              {
+                _id: { AccountType: "$AccountType", AccountSubType: "$AccountSubType", SortOrder: "$SortOrder"
+                , AccountNumber: "$AccountNumber", AccountName: "$AccountName", Person: "$Person" },
+                Amount: { $sum: "$AccountAmount" }
+              }}
+        ])//end Aggregate
+        .exec(function(err, results){
+          callback(results);
+         })
 }//end function
 
-function accountsubtypesums(client, callback) {
-  client.connect(url, { useNewUrlParser: true },function(err, client) {
-    assert.equal(null, err);
-    console.log("AccountSubTypeSums" + Date.now());
-    const db = client.db('FarmDB');
-    db.collection('accountsubtypesums').find({}).toArray(function(err, docs) {
-      assert.equal(err, null);
-      callback(docs);
-    });//end collection
- client.close();
-  });//end mongoclient
-}//end function
-
-function accountsums(client, callback) {
-  client.connect(url, { useNewUrlParser: true },function(err, client) {
-    assert.equal(null, err);
-    console.log("AccountSums" + Date.now());
-    const db = client.db('FarmDB');
-    db.collection('accountsums').find({}).toArray(function(err, docs) {
-      assert.equal(err, null);
-      callback(docs);
-    });//end collection
- client.close();
-  });//end mongoclient
-}//end function
-
-function combine(callback) {
-  let ATS = accounttypesums(MongoClient, function(ats) {
-   let ASTS = accountsubtypesums(MongoClient, function(asts) {
-    let AS = accountsums(MongoClient, function(as) {
+function combine(person,fromDate,toDate,callback) {
+  let ATS = accounttypesums(person,fromDate,toDate, function(ats) {
+   let ASTS = accountsubtypesums(person,fromDate,toDate, function(asts) {
+    let AS = accountsums(person,fromDate,toDate, function(as) {
     var output = ats.concat(asts.concat(as));
     callback(output);
         });//end function
@@ -63,6 +89,7 @@ function GetTransactionID(callback) {
      })//end collection
  client.close();
   });//end mongoclient
+
 }
 
 module.exports = { combine, accountsums,  accountsubtypesums, accounttypesums, GetTransactionID}
