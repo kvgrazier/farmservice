@@ -5,6 +5,54 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const url = 'mongodb://localhost:27017/';
 
+function pltotal(person,fromDate,toDate,callback) {
+  var fromDate = new Date(fromDate.toISOString());
+  var toDate = new Date(toDate.toISOString());
+        Ta.aggregate([
+          {$match: { 
+            Person: person
+             ,TransactionDate: {$gte: fromDate}
+             ,TransactionDate: {$lte: toDate}
+          }}
+          ,{$group:
+            {
+              _id: { AccountType: "$AccountType", AccountSubType: "Total", SortOrder: "100"
+              , AccountNumber: "", AccountName: "",Person: "$Person" },
+              Amount: { $sum: "$AccountAmount" }
+          }}
+          ,{$project: {
+            _id: 0,
+                AccountType: "$_id.AccountType",
+                AccountSubType: "$_id.AccountSubType",
+                AccountNumber: "$_id.AccountNumber",
+                AccountName: "$_id.AccountName",
+                Amount: {$cond: [ { $eq: [ "$_id.AccountType", "Revenue" ] }, "$Amount", 
+                { $multiply: [ "$Amount", -1 ] }]},  
+                Person: "$_id.Person",
+                SortOrder: {$cond: [ { $eq: [ "$_id.AccountType", "Revenue" ] }, 13.7, 50 ]}  
+            }}
+          ,{$group:
+            {
+              _id: { AccountType: "Total Profit or Loss", AccountSubType: "", SortOrder: "100"
+              , AccountNumber: "", AccountName: "",Person: "$Person" },
+              Amount: { $sum: "$Amount" }
+          }}
+          ,{$project: {
+            _id: 0,
+                AccountType: "$_id.AccountType",
+                AccountSubType: "$_id.AccountSubType",
+                AccountNumber: "$_id.AccountNumber",
+                AccountName: "$_id.AccountName",
+                Amount: "$Amount",  
+                Person: "$_id.Person",
+                SortOrder: "$_id.SortOrder"  
+            }}
+        ])//end Aggregate
+        .exec(function(err, results){
+          callback(results);
+         })
+}//end function
+
 function accounttypesums(person,fromDate,toDate,callback) {
     var fromDate = new Date(fromDate.toISOString());
     var toDate = new Date(toDate.toISOString());
@@ -99,14 +147,16 @@ function accountsums(person,fromDate,toDate,callback) {
 }//end function
 
 function combine(person,fromDate,toDate,callback) {
-  let ATS = accounttypesums(person,fromDate,toDate, function(ats) {
-   let ASTS = accountsubtypesums(person,fromDate,toDate, function(asts) {
-    let AS = accountsums(person,fromDate,toDate, function(as) {
-    var output = ats.concat(asts.concat(as));
-    callback(output.sort((a, b) => a.SortOrder - b.SortOrder));
+  let PLTot = pltotal(person,fromDate,toDate, function(pltot) {
+   let ATS = accounttypesums(person,fromDate,toDate, function(ats) {
+    let ASTS = accountsubtypesums(person,fromDate,toDate, function(asts) {
+     let AS = accountsums(person,fromDate,toDate, function(as) {
+     var output = pltot.concat(ats.concat(asts.concat(as)));
+     callback(output.sort((a, b) => a.SortOrder - b.SortOrder));
         });//end function
       });//end function
      });//end function
+    });//end function
 }
 
 function GetTransactionID(callback) {
