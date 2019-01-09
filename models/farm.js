@@ -27,8 +27,8 @@ function accounttypesums(person,fromDate,toDate,callback) {
                   AccountNumber: "$_id.AccountNumber",
                   AccountName: "$_id.AccountName",
                   Amount: "$Amount",
-                  Person: "$_id.Person",  
-                  SortOrder: "$_id.SortOrder"
+                  Person: "$_id.Person",
+                  SortOrder: {$cond: [ { $eq: [ "$_id.AccountType", "Revenue" ] }, 13.7, 50 ]}  
               }}
           ])//end Aggregate
           .exec(function(err, results){
@@ -59,7 +59,7 @@ function accountsubtypesums(person,fromDate,toDate,callback) {
                   AccountName: "$_id.AccountName",
                   Amount: "$Amount",
                   Person: "$_id.Person",  
-                  SortOrder: "$_id.SortOrder"
+                  SortOrder: { $add: [ "$_id.SortOrder", .1 ] }
               }}
           ])//end Aggregate
           .exec(function(err, results){
