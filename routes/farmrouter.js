@@ -7,10 +7,10 @@ var Ta = require('../models/Ta.js');
 let farm = require('../models/farm.js');
 
 /* Profit And Loss */
-router.get('/pl/:person/:fromdate/:todate', function(req, res) {
-  var fromDate = new Date(req.params.fromdate);
-  var toDate = new Date(req.params.todate);
-  let Sums = farm.combine(req.params.person,fromDate,toDate,function(docs) {
+router.get('/pl/', function(req, res) {
+  var fromDate = new Date(req.query.fromdate);
+  var toDate = new Date(req.query.todate);
+  let Sums = farm.combine(req.query.person,fromDate,toDate,function(docs) {
     res.json(docs); });//end function
 });// end router
 
